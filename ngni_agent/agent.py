@@ -34,18 +34,22 @@ def setup_before_agent_call(callback_context: CallbackContext):
 
     # setting up schema in instruction
     if callback_context.state["all_db_settings"]["use_database"] == "BigQuery":
-        callback_context.state["database_settings"] = get_bq_database_settings()
-        schema = callback_context.state["database_settings"]["bq_ddl_schema"]
+        try:
+            callback_context.state["database_settings"] = get_bq_database_settings()
+            schema = callback_context.state["database_settings"]["bq_ddl_schema"]
 
-        callback_context._invocation_context.agent.instruction = (
-            return_instructions_root()
-            + f"""
+            callback_context._invocation_context.agent.instruction = (
+                return_instructions_root()
+                + f"""
 
-    --------- The BigQuery schema of the relevant data with a few sample rows. ---------
-    {schema}
+        --------- The BigQuery schema of the relevant data with a few sample rows. ---------
+        {schema}
 
-    """
-        )
+        """
+            )
+        except Exception as e:
+            import logging
+            logging.warning(f"Failed to load BigQuery schema: {e}. Proceeding without schema.")
 
 # ROOT AGENT DEFINITION
 root_agent = Agent(
