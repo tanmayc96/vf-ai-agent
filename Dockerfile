@@ -16,12 +16,17 @@ RUN pip install "poetry==$POETRY_VERSION"
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy all files from the current directory into the container
-COPY pyproject.toml poetry.lock* README.md main.py /app/
+# Copy only dependency files first to leverage caching
+COPY pyproject.toml poetry.lock* /app/
 
+# Generate the lock file and install dependencies (no-root to avoid installing the package itself yet)
+RUN poetry install --no-root --no-ansi
+
+# Copy the rest of the application code
+COPY README.md main.py /app/
 COPY ngni_agent /app/ngni_agent
 
-# Generate the lock file without updating dependencies
+# Install the project itself (if it's a package)
 RUN poetry install --no-ansi
 
 ENV PYTHONPATH=/app
