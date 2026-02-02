@@ -169,7 +169,8 @@ The agent exposes a REST API compliant with Cloud Run deployment requirements.
 
 ```json
 {
-  "query": "Your question here"
+  "query": "Your question here",
+  "session_id": "optional-session-id"
 }
 ```
 
@@ -197,6 +198,10 @@ To run the API server locally:
     ```bash
     poetry run python main.py
     ```
+    Or using the FastAPI CLI:
+    ```bash
+    poetry run fastapi dev main.py
+    ```
     The server will start on `http://0.0.0.0:8000`.
 
 4.  **Test the Endpoint:**
@@ -205,5 +210,5 @@ To run the API server locally:
     ```bash
     curl -X POST "http://localhost:8000/query" \
          -H "Content-Type: application/json" \
-         -d '{"query": "What are the top ranked areas in Berlin?"}'
+         -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "my-session"}'
     ```

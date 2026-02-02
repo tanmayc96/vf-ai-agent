@@ -28,22 +28,19 @@ runner = Runner(
 
 class QueryRequest(BaseModel):
     query: str
+    session_id: str = "default_session"
 
 @app.post("/query")
 async def query_agent(request: QueryRequest):
     """
     Process a user query using the root_agent via ADK Runner.
     """
-    # Use a fixed session for simplicity, or generate one per request if needed.
-    # For a simple query endpoint, a new session or fixed one is fine.
-    # We will use a fixed one to allow context retention if desired, 
-    # or uuid for new session. Let's use a static one for now as per simple req.
-    session_id = "default_session"
+    # Use the session_id from the request, or default if not provided.
     
     response_text = ""
     async for event in runner.run_async(
         user_id="user",
-        session_id=session_id,
+        session_id=request.session_id,
         new_message=types.Content(role="user", parts=[types.Part(text=request.query)])
     ):
         # Accumulate text content from events
