@@ -1,8 +1,11 @@
 import os 
 import uvicorn 
 from fastapi import FastAPI
+from pydantic import BaseModel
 from ngni_agent.agent import root_agent
 from google.adk.cli.fast_api import get_fast_api_app
+from google.adk.runners import Runner
+from google.adk.sessions.in_memory_session_service import InMemorySessionService
 
 AGENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -14,8 +17,13 @@ app: FastAPI = get_fast_api_app(
 app.title = "root_agent"
 app.description = "API for interacting with NGNI agent"
 
-from pydantic import BaseModel
-from fastapi import HTTPException
+# Initialize services for custom endpoint
+session_service = InMemorySessionService()
+runner = Runner(
+    agent=root_agent,
+    session_service=session_service,
+    app_name="ngni_agent"
+)
 
 class QueryRequest(BaseModel):
     query: str
@@ -23,38 +31,27 @@ class QueryRequest(BaseModel):
 @app.post("/query")
 async def query_agent(request: QueryRequest):
     """
-    Endpoint to query the agent.
+    Process a user query using the root_agent via ADK Runner.
     """
-
-
-    try:
-        response = None
-        if hasattr(root_agent, "query"):
-            response = root_agent.query(request.query)
-        elif hasattr(root_agent, "invoke"):
-            response = root_agent.invoke(request.query)
-        elif callable(root_agent):
-            response = root_agent(request.query)
-        else:
-            # Fallback: try to find a method that looks like a query method
-            attrs = dir(root_agent)
-            print(f"DEBUG: Agent attributes: {attrs}")
-            raise HTTPException(status_code=500, detail=f"Agent interface unknown. Available attributes: {attrs}")
-        
-        # normalizing response
-        if hasattr(response, "text"):
-            return {"response": response.text}
-        elif isinstance(response, str):
-            return {"response": response}
-        elif isinstance(response, dict):
-            return response
-        else:
-            return {"response": str(response)}
-            
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+    # Use a fixed session for simplicity, or generate one per request if needed.
+    # For a simple query endpoint, a new session or fixed one is fine.
+    # We will use a fixed one to allow context retention if desired, 
+    # or uuid for new session. Let's use a static one for now as per simple req.
+    session_id = "default_session"
+    
+    response_text = ""
+    async for event in runner.run_async(
+        user_id="user",
+        session_id=session_id,
+        new_message=request.query
+    ):
+        # Accumulate text content from events
+        if event.content:
+            for part in event.content.parts:
+                if part.text:
+                    response_text += part.text
+                    
+    return {"response": response_text}
 
 if __name__ == "__main__":
     print("main",AGENT_DIR)

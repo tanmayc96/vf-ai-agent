@@ -154,3 +154,56 @@ To create your custom agent and run it locally, you will have to update the agen
    
 * Need to create/modify `Dockerfile`
 * You need to modify the configuration variables in `cloudbuild/image-buildnl.yaml` depending on the environment.
+
+## API Usage
+
+The agent exposes a REST API compliant with Cloud Run deployment requirements.
+
+### Query Endpoint
+
+**URL**: `/query`
+**Method**: `POST`
+**Content-Type**: `application/json`
+
+**Request Body:**
+
+```json
+{
+  "query": "Your question here"
+}
+```
+
+**Response:**
+
+```json
+{
+  "response": "Agent's detailed response..."
+}
+```
+
+### Running Locally
+
+To run the API server locally:
+
+1.  **Setup Environment:**
+    Ensure your `.env` file is created and populated as described in the **Configuration** section above.
+
+2.  **Install Dependencies:**
+    ```bash
+    poetry install
+    ```
+
+3.  **Start the Server:**
+    ```bash
+    poetry run python main.py
+    ```
+    The server will start on `http://0.0.0.0:8080`.
+
+4.  **Test the Endpoint:**
+    You can test the API using `curl`:
+
+    ```bash
+    curl -X POST "http://localhost:8080/query" \
+         -H "Content-Type: application/json" \
+         -d '{"query": "What are the top ranked areas in Berlin?"}'
+    ```
