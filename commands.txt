@@ -3,13 +3,13 @@ curl -X POST http://127.0.0.1:8000/apps/ngni_agent/users/user_123/sessions/sessi
     -d '{"preferred_language": "English", "visit_count": 5}'
 
 
-      File "/home/tanmay_chanda/vf-ai-agent/main.py", line 41, in query_agent
-    async for event in runner.run_async(
-  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/adk/runners.py", line 562, in run_async
-    async for event in agen:
-  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/adk/runners.py", line 497, in _run_with_trace
-    session = await self._get_or_create_session(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/adk/runners.py", line 385, in _get_or_create_session
-    raise ValueError(message)
-ValueError: Session not found: session_abc
+  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/genai/_api_client.py", line 201, in refresh_auth
+    credentials.refresh(Request())  # type: ignore[no-untyped-call]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/auth/credentials.py", line 367, in refresh
+    self._perform_refresh_token(request)
+  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/auth/compute_engine/credentials.py", line 139, in _perform_refresh_token
+    self._retrieve_info(request)
+  File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/auth/compute_engine/credentials.py", line 112, in _retrieve_info
+    raise exceptions.RefreshError(
+google.auth.exceptions.RefreshError: Unexpected response from metadata server: service account info is missing 'email' field.
