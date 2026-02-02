@@ -23,23 +23,25 @@ session_service = InMemorySessionService()
 runner = Runner(
     agent=root_agent,
     session_service=session_service,
-    app_name="ngni_agent"
+    app_name="ngni_agent",
+    auto_create_session=True
 )
 
 class QueryRequest(BaseModel):
     query: str
     session_id: str = "default_session"
+    user_id: str = "user"
 
 @app.post("/query")
 async def query_agent(request: QueryRequest):
     """
     Process a user query using the root_agent via ADK Runner.
     """
-    # Use the session_id from the request, or default if not provided.
+    # Use the session_id and user_id from the request, or defaults.
     
     response_text = ""
     async for event in runner.run_async(
-        user_id="user",
+        user_id=request.user_id,
         session_id=request.session_id,
         new_message=types.Content(role="user", parts=[types.Part(text=request.query)])
     ):

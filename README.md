@@ -167,10 +167,13 @@ The agent exposes a REST API compliant with Cloud Run deployment requirements.
 
 **Request Body:**
 
+**Request Body:**
+
 ```json
 {
   "query": "Your question here",
-  "session_id": "optional-session-id"
+  "session_id": "optional-session-id",
+  "user_id": "optional-user-id"
 }
 ```
 
@@ -210,5 +213,5 @@ To run the API server locally:
     ```bash
     curl -X POST "http://127.0.0.1:8000/query" \
          -H "Content-Type: application/json" \
-         -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "session_abc"}'
+         -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "session_abc", "user_id": "user_123"}'
     ```
