@@ -64,7 +64,7 @@ Here's a general workflow you can expect:
         # Example
         make adk-web
         ```
-        Then, open the `http://127.0.0.1:8000/` in your browser and select the agent from the dropdown menu.
+        Then, open the `http://127.0.0.1:8080/` in your browser and select the agent from the dropdown menu.
 
 5.  **Evaluating the Agent:**
     *  To Evaluate the agent run `make adk-eval`
@@ -205,13 +205,13 @@ To run the API server locally:
     ```bash
     poetry run fastapi dev main.py
     ```
-    The server will start on `http://0.0.0.0:8000`.
+    The server will start on `http://0.0.0.0:8080`.
 
 4.  **Test the Endpoint:**
     You can test the API using `curl`:
 
     ```bash
-    curl -X POST "http://127.0.0.1:8000/query" \
+    curl -X POST "ADK_URL/query" \
          -H "Content-Type: application/json" \
          -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "session_abc", "user_id": "user_123"}'
     ```
