@@ -25,14 +25,22 @@ async def query_agent(request: QueryRequest):
     """
     Endpoint to query the agent.
     """
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     try:
+        response = None
         if hasattr(root_agent, "query"):
             response = root_agent.query(request.query)
         elif hasattr(root_agent, "invoke"):
             response = root_agent.invoke(request.query)
+        elif callable(root_agent):
+            response = root_agent(request.query)
         else:
             # Fallback: try to find a method that looks like a query method
-            raise HTTPException(status_code=500, detail=f"Agent interface unknown. Available attributes: {dir(root_agent)}")
+            attrs = dir(root_agent)
+            print(f"DEBUG: Agent attributes: {attrs}")
+            raise HTTPException(status_code=500, detail=f"Agent interface unknown. Available attributes: {attrs}")
         
         # normalizing response
         if hasattr(response, "text"):
@@ -45,6 +53,8 @@ async def query_agent(request: QueryRequest):
             return {"response": str(response)}
             
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
