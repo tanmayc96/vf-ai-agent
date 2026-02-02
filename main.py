@@ -25,8 +25,7 @@ async def query_agent(request: QueryRequest):
     """
     Endpoint to query the agent.
     """
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
 
     try:
         response = None
