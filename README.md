@@ -197,13 +197,13 @@ To run the API server locally:
     ```bash
     poetry run python main.py
     ```
-    The server will start on `http://0.0.0.0:8080`.
+    The server will start on `http://0.0.0.0:8000`.
 
 4.  **Test the Endpoint:**
     You can test the API using `curl`:
 
     ```bash
-    curl -X POST "http://localhost:8080/query" \
+    curl -X POST "http://localhost:8000/query" \
          -H "Content-Type: application/json" \
          -d '{"query": "What are the top ranked areas in Berlin?"}'
     ```

@@ -2,6 +2,7 @@ import os
 import uvicorn 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from google.genai import types
 from ngni_agent.agent import root_agent
 from google.adk.cli.fast_api import get_fast_api_app
 from google.adk.runners import Runner
@@ -43,7 +44,7 @@ async def query_agent(request: QueryRequest):
     async for event in runner.run_async(
         user_id="user",
         session_id=session_id,
-        new_message=request.query
+        new_message=types.Content(role="user", parts=[types.Part(text=request.query)])
     ):
         # Accumulate text content from events
         if event.content:
@@ -55,4 +56,4 @@ async def query_agent(request: QueryRequest):
 
 if __name__ == "__main__":
     print("main",AGENT_DIR)
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
