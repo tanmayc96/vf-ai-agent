@@ -1,60 +1,52 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# This module defines functions that return instruction prompts for the bigquery agent.
-# These instructions guide the agent's behavior, workflow, and tool usage.
+"""Database Agent: get data from database (BigQuery) using NL2SQL."""
 
 import os
 
+from google.adk.agents import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.genai import types
+from google.adk.tools import load_artifacts
 
-def return_instructions_bigquery() -> str:
+from . import tools
+from .prompts import return_instructions_bigquery
 
-    NL2SQL_METHOD = os.getenv("NL2SQL_METHOD", "BASELINE")
-    if NL2SQL_METHOD == "BASELINE":
-        db_tool_name = "query_bigquery"
-    else:
-        db_tool_name = None
-        raise ValueError(f"Unknown NL2SQL method: {NL2SQL_METHOD}")
-    
-    instruction_prompt_bqml_v1 = """
-      You are an AI assistant serving as a SQL expert for BigQuery.
-      Your job is to help users generate SQL answers from natural language questions.
+NL2SQL_METHOD = os.getenv("NL2SQL_METHOD", "BASELINE")
+os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
+os.environ["GOOGLE_CLOUD_PROJECT"] = "vf-grp-aib-dev-ngi-sbx-alpha"
+os.environ["GOOGLE_CLOUD_LOCATION"] = "europe-west1"
 
-      **Process:**
-      1. Generate SQL using `query_bigquery`.
-      2. Validate with `run_bigquery_validation`. Correct errors if any.
-      3. Return ONLY the raw JSON data from validation. NO text, NO summaries.
+def setup_before_agent_call(callback_context: CallbackContext) -> None:
+    """Setup the agent."""
 
-      **Tools Usage:** ALWAYS use `query_bigquery` and `run_bigquery_validation`. Never hallucinate SQL or data.
+    if "database_settings" not in callback_context.state:
+        callback_context.state["database_settings"] = \
+            tools.get_database_settings()
 
-      <schema_knowledge>
-      **Dataset ID: `h3_consumption`** (Joins on `municipality_code`)
 
-      **Table 1: `berlin_external_foundation`** (Base Table)
-      - Columns: `municipality_name` (STRING), `municipality_code` (STRING), `avg_population` (FLOAT), `avg_age` (FLOAT), `total_commercial` (INTEGER), `total_residential` (INTEGER), `total_landfill` (INTEGER), `hex_count` (INTEGER), `hex_profile_classification` (STRING).
-
-      **Table 2: `vodafone_performance`** (Performance Metrics)
-      - Columns: `municipality_name` (STRING), `municipality_code` (STRING), `broadband_market_share_pct` (FLOAT), `chrun_rate_pct` (FLOAT), `mobile_market_share_pct` (FLOAT), `monthly_arpu_euro` (FLOAT), `avg_download_speed_mbps` (FLOAT), `congestion_index` (FLOAT), `latency_ms` (FLOAT), `signal_strength_dbm` (FLOAT).
-      </schema_knowledge>
-
-      1. **MANDATORY FILTERING:**
-         - **ALWAYS** add `WHERE T1.municipality_code IS NOT NULL`.
-         - Ignore records where `municipality_code` is NULL or Empty.
-         - **DO NOT** filter by columns from joined tables (e.g. `churn_rate`, `latency`) as this negates the LEFT JOIN. Use them only for selection/ordering.
-
-      2. **AGGREGATION & GROUPING:**
-         - Data is already at municipality level (implied by columns like `avg_population`).
-         - If aggregation is needed, Group by `municipality_code` AND `municipality_name`.
-
-      3. **PERFORMANCE LOGIC (Updated):**
-         - **CHURN:** `chrun_rate_pct` > 5 OR `congestion_index` > 0.8.
-         - **GROWTH:** `mobile_market_share_pct` < 20 AND `avg_population` > 5000.
-         - **QUALITY:** `avg_download_speed_mbps` < 30 OR `latency_ms` > 50.
-
-      4. **SQL BEST PRACTICES:**
-         - **ALWAYS** use `LEFT JOIN` starting with `berlin_external_foundation` (as T1) to ensure NO municipalities are dropped.
-         - `LEFT JOIN vodafone_performance` (as T2) ON `T1.municipality_code = T2.municipality_code`.
-         - Select `T1.municipality_name` and `T1.municipality_code`.
-         - LIMIT 50 unless specific filtering is applied.
-      </generation_rules>
-    """
-
-    return instruction_prompt_bqml_v1
+db_agent = Agent(
+    model="gemini-2.5-flash",
+    name="db_agent",
+    instruction=return_instructions_bigquery(),
+    tools=[
+        (
+            tools.query_bigquery
+        ),
+        tools.run_bigquery_validation,
+    ],
+    before_agent_callback=setup_before_agent_call,
+    generate_content_config=types.GenerateContentConfig(temperature=0.01),
+)
