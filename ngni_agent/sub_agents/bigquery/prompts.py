@@ -26,46 +26,34 @@ def return_instructions_bigquery() -> str:
       **Tools Usage:** ALWAYS use `query_bigquery` and `run_bigquery_validation`. Never hallucinate SQL or data.
 
       <schema_knowledge>
-      **Dataset ID: `h3_insights_consumption_level5`** (All tables join on `hex_id`)
+      **Dataset ID: `h3_consumption`** (Joins on `municipality_code`)
 
-      **Category 1: EXTERNAL DATA (Context)**
-      **Table 1: `berlin_external_foundation`**
-      - Columns: `hex_id` (STRING), `geom` (GEOGRAPHY), `municipality_code` (STRING), `municipality_name` (STRING), `population` (INT), `avg_age` (FLOAT), `commercial_density` (INT), `residential_density` (INT), `hex_profile` (STRING).
+      **Table 1: `berlin_external_foundation`** (Base Table)
+      - Columns: `municipality_name` (STRING), `municipality_code` (STRING), `avg_population` (FLOAT), `avg_age` (FLOAT), `total_commercial` (INTEGER), `total_residential` (INTEGER), `total_landfill` (INTEGER), `hex_count` (INTEGER), `hex_profile_classification` (STRING).
 
-      **Category 2: QUADRANT DATA ( Strategy)**
-      **Table 2: `berlin_final_quadrants`**
-      - Columns: `hex_id`, `commercial_performance_score` (FLOAT), `network_performance_score` (FLOAT), `final_quadrant` (STRING).
-      **Table 3: `berlin_quadrants_ml_results`**
-      - Columns: `hex_id`, `ml_quadrant` (STRING).
-      **Table 4: `master_quadrant_comparison`**
-      - Columns: `hex_id`, `rule_label`, `ml_label`, `exact_match` (BOOL), `conflict_severity` (INT), `agreement_status` (STRING).
-
-      **Category 3: VODAFONE DATA (Performance)**
-      **Table 5: `vf_commercial_data`**
-      - Columns: `hex_id`, `mobile_market_share_pct` (FLOAT), `broadband_market_share_pct` (FLOAT), `monthly_arpu_euro` (FLOAT), `churn_rate_pct` (FLOAT).
-      **Table 6: `vf_network_performance`**
-      - Columns: `hex_id`, `latency_ms` (FLOAT), `avg_download_speed_mbps` (FLOAT), `signal_strength_dbm` (FLOAT), `congestion_index` (FLOAT).
+      **Table 2: `vodafone_performance`** (Performance Metrics)
+      - Columns: `municipality_name` (STRING), `municipality_code` (STRING), `broadband_market_share_pct` (FLOAT), `chrun_rate_pct` (FLOAT), `mobile_market_share_pct` (FLOAT), `monthly_arpu_euro` (FLOAT), `avg_download_speed_mbps` (FLOAT), `congestion_index` (FLOAT), `latency_ms` (FLOAT), `signal_strength_dbm` (FLOAT).
       </schema_knowledge>
 
       1. **MANDATORY FILTERING:**
-         - **ALWAYS** add `WHERE municipality_code IS NOT NULL`.
+         - **ALWAYS** add `WHERE T1.municipality_code IS NOT NULL`.
          - Ignore records where `municipality_code` is NULL or Empty.
-         - Filter out generic names if detected (e.g. `municipality_name != 'Unknown'`).
+         - **DO NOT** filter by columns from joined tables (e.g. `churn_rate`, `latency`) as this negates the LEFT JOIN. Use them only for selection/ordering.
 
       2. **AGGREGATION & GROUPING:**
-         - Aggregate results by `municipality_code` AND `municipality_name`.
-         - Return data grouped by these two columns unless specific hex-level details are requested.
+         - Data is already at municipality level (implied by columns like `avg_population`).
+         - If aggregation is needed, Group by `municipality_code` AND `municipality_name`.
 
-      3. **PERFORMANCE LOGIC:**
-         - **CHURN:** `churn_rate` > 5 OR `congestion` > 0.8.
-         - **GROWTH:** `comm_score` > 0.7 AND `arpu` > 40.
-         - **SUBSIDY:** `pop` < 500 AND `d_speed` < 30.
-         - **IPHONE:** `avg_age` < 35 AND `arpu` > 50.
+      3. **PERFORMANCE LOGIC (Updated):**
+         - **CHURN:** `chrun_rate_pct` > 5 OR `congestion_index` > 0.8.
+         - **GROWTH:** `mobile_market_share_pct` < 20 AND `avg_population` > 5000.
+         - **QUALITY:** `avg_download_speed_mbps` < 30 OR `latency_ms` > 50.
 
       4. **SQL BEST PRACTICES:**
-         - `INNER JOIN` on `hex_id`.
-         - Use `municipality_name` from `berlin_external_foundation`.
-         - LIMIT 50 unless aggregation is requested.
+         - **ALWAYS** use `LEFT JOIN` starting with `berlin_external_foundation` (as T1) to ensure NO municipalities are dropped.
+         - `LEFT JOIN vodafone_performance` (as T2) ON `T1.municipality_code = T2.municipality_code`.
+         - Select `T1.municipality_name` and `T1.municipality_code`.
+         - LIMIT 50 unless specific filtering is applied.
       </generation_rules>
     """
 
