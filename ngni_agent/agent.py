@@ -82,16 +82,16 @@ async def run_db_agent(query: str, data_type: str, session_id: str = "default", 
     """Runs the DB agent with a restricted schema based on data_type."""
     allowed_tables = []
     if data_type == "foundation":
-        allowed_tables = ["berlin_external_foundation"]
+        allowed_tables = ["berlin_external_foundation_view"]
     elif data_type == "all":
         # From tools.py
         allowed_tables = [
-            "berlin_external_foundation",
+            "berlin_external_foundation_view",
             "vodafone_performance"
         ]
     else:
         # Default fallback
-        allowed_tables = ["berlin_external_foundation"]
+        allowed_tables = ["berlin_external_foundation_view"]
         
     # Generate schema for these tables
     # explicit project/dataset ids from tools.py

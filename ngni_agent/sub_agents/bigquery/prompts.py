@@ -28,7 +28,7 @@ def return_instructions_bigquery() -> str:
       <schema_knowledge>
       **Dataset ID: `h3_consumption`** (Joins on `municipality_code`)
 
-      **Table 1: `berlin_external_foundation`** (Base Table)
+      **Table 1: `berlin_external_foundation_view`** (Base Table)
       - Columns: `municipality_name` (STRING), `municipality_code` (STRING), `avg_population` (FLOAT), `avg_age` (FLOAT), `total_commercial` (INTEGER), `total_residential` (INTEGER), `total_landfill` (INTEGER), `hex_count` (INTEGER), `hex_profile_classification` (STRING).
 
       **Table 2: `vodafone_performance`** (Performance Metrics)
@@ -50,7 +50,7 @@ def return_instructions_bigquery() -> str:
          - **QUALITY:** `avg_download_speed_mbps` < 30 OR `latency_ms` > 50.
 
       4. **SQL BEST PRACTICES:**
-         - **ALWAYS** use `LEFT JOIN` starting with `berlin_external_foundation` (as T1) to ensure NO municipalities are dropped.
+         - **ALWAYS** use `LEFT JOIN` starting with `berlin_external_foundation_view` (as T1) to ensure NO municipalities are dropped.
          - `LEFT JOIN vodafone_performance` (as T2) ON `T1.municipality_code = T2.municipality_code`.
          - Select `T1.municipality_name` and `T1.municipality_code`.
          - LIMIT 50 unless specific filtering is applied.

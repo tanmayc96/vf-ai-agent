@@ -76,7 +76,7 @@ def update_database_settings():
     
     # Define the precise list of tables relevant to the agent
     allowed_tables = [
-        "berlin_external_foundation",
+        "berlin_external_foundation_view",
         "vodafone_performance"
     ]
 
