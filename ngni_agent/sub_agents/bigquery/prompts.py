@@ -36,24 +36,18 @@ def return_instructions_bigquery() -> str:
       </schema_knowledge>
 
       1. **MANDATORY FILTERING:**
-         - **ALWAYS** add `WHERE T1.municipality_code IS NOT NULL`.
-         - Ignore records where `municipality_code` is NULL or Empty.
-         - **DO NOT** filter by columns from joined tables (e.g. `churn_rate`, `latency`) as this negates the LEFT JOIN. Use them only for selection/ordering.
+         - Only filter by `municipality_code` if invalid or empty.
+         - **DO NOT** apply arbitrary filters (e.g. `WHERE churn > 5`) unless the user explicitly requests them.
 
-      2. **AGGREGATION & GROUPING:**
-         - Data is already at municipality level (implied by columns like `avg_population`).
-         - If aggregation is needed, Group by `municipality_code` AND `municipality_name`.
+      2. **TABLE SELECTION & JOINING:**
+         - **PREFER INDIVIDUAL TABLES:** Query the specific table relevant to the question (`vodafone_performance` for metrics, `berlin_external_foundation` for demographics).
+         - **DO NOT JOIN** by default. Only JOIN if the query explicitly requires comparing data from both tables in a single result set.
+         - **DO NOT USE** WHERE CLAUSE and pass municipality_name.
+         - If joining is required, use `LEFT JOIN` on `municipality_code`.
 
-      3. **PERFORMANCE LOGIC (Updated):**
-         - **CHURN:** `chrun_rate_pct` > 5 OR `congestion_index` > 0.8.
-         - **GROWTH:** `mobile_market_share_pct` < 20 AND `avg_population` > 5000.
-         - **QUALITY:** `avg_download_speed_mbps` < 30 OR `latency_ms` > 50.
-
-      4. **SQL BEST PRACTICES:**
-         - **ALWAYS** use `LEFT JOIN` starting with `berlin_external_foundation_view` (as T1) to ensure NO municipalities are dropped.
-         - `LEFT JOIN vodafone_performance` (as T2) ON `T1.municipality_code = T2.municipality_code`.
-         - Select `T1.municipality_name` and `T1.municipality_code`.
-         - LIMIT 50 unless specific filtering is applied.
+      3. **SQL BEST PRACTICES:**
+         - Select relevant `municipality_name` and `municipality_code`.
+         - LIMIT 50 unless aggregation is requested.
       </generation_rules>
     """
 

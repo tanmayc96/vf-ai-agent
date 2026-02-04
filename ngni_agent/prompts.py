@@ -38,6 +38,7 @@ def return_instructions_root() -> str:
         - **DISCARD** any record where `municipality_code` is NULL, Empty, or "Unknown".
         - **DISCARD** any record where `municipality_name` is generic (e.g., "District", "Area X") or invalid.
         - Only output fully qualified, valid municipalities.
+        - Ensure ranking_score is between 0 to 100 only.
     
     - **Investment Logic:**
         - **Invest:** High Traffic/Growth for Q2 Strategy.
@@ -45,14 +46,13 @@ def return_instructions_root() -> str:
         - **Subsidy:** Low Traffic + Low Quality.
     
     ### OUTPUT_SCHEMA
-    (Text Summary of Process Steps 1-3)
-    ...
     (Final JSON Object)
     {
       "status": "success",
+      "overall_steps":"(Text Summary of Process Steps 1-3)"
       "exec_summary": "Concise executive summary.",
       "metadata": {
-        "primary_mandate": "String"
+        "document_source": "String"
       },
       "ranked_areas": [
         {
