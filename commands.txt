@@ -13,3 +13,7 @@ curl -X POST http://127.0.0.1:8000/apps/ngni_agent/users/user_123/sessions/sessi
   File "/home/tanmay_chanda/vf-ai-agent/.venv/lib/python3.12/site-packages/google/auth/compute_engine/credentials.py", line 112, in _retrieve_info
     raise exceptions.RefreshError(
 google.auth.exceptions.RefreshError: Unexpected response from metadata server: service account info is missing 'email' field.
+
+docker build -t ngni-agent-tc .
+docker tag ngni-agent-tc europe-west1-docker.pkg.dev/vf-grp-aib-dev-ngi-sbx-alpha/docker-images/ngni-agent-tc:latest
+docker push europe-west1-docker.pkg.dev/vf-grp-aib-dev-ngi-sbx-alpha/docker-images/ngni-agent-tc:latest

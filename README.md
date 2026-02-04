@@ -213,5 +213,8 @@ To run the API server locally:
     ```bash
     curl -X POST "ADK_URL/query" \
          -H "Content-Type: application/json" \
-         -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "session_abc", "user_id": "user_123"}'
+         -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "session_abc"}'
     ```
+    curl -X POST "http://0.0.0.0:8080/query" \
+         -H "Content-Type: application/json" \
+         -d '{"query": "What are the top ranked areas in Berlin?", "session_id": "session_abc"}'

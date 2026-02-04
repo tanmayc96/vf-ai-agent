@@ -27,7 +27,7 @@ from google.genai import Client
 project = os.getenv("BQ_PROJECT_ID", "vf-grp-aib-dev-ngi-sbx-alpha")
 location = os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west1")
 llm_client = Client(vertexai=True, project=project, location=location)
-dataset_id = "h3_insights_consumption"
+dataset_id = "h3_consumption"
 
 os.environ["BASELINE_NL2SQL_MODEL"]="gemini-2.5-flash"
 MAX_NUM_ROWS = 80
@@ -77,11 +77,7 @@ def update_database_settings():
     # Define the precise list of tables relevant to the agent
     allowed_tables = [
         "berlin_external_foundation",
-        "berlin_final_quadrants",
-        "berlin_quadrants_ml_results",
-        "master_quadrant_comparison",
-        "vf_commercial_data",
-        "vf_network_performance"
+        "vodafone_performance"
     ]
 
     ddl_schema = get_bigquery_schema(
@@ -92,7 +88,7 @@ def update_database_settings():
     )
     database_settings = {
         "bq_project_id": "vf-grp-aib-dev-ngi-sbx-alpha",
-        "bq_dataset_id": "h3_insights_consumption",
+        "bq_dataset_id": "h3_consumption",
         "bq_ddl_schema": ddl_schema,
     }
     return database_settings
@@ -114,7 +110,7 @@ def get_bigquery_schema(dataset_id, client=None, project_id=None, allowed_tables
     if client is None:
         client = bigquery.Client(project=project_id)
     project_id= "vf-grp-aib-dev-ngi-sbx-alpha"
-    dataset_id= "h3_insights_consumption"
+    dataset_id= "h3_consumption"
     # dataset_ref = client.dataset(dataset_id)
     dataset_ref = bigquery.DatasetReference(project_id, dataset_id)
 
