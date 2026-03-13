@@ -26,8 +26,8 @@ from .sub_agents.bigquery.tools import (
 )
 
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
-os.environ["GOOGLE_CLOUD_PROJECT"] = "vf-grp-aib-dev-ngi-sbx-alpha"
-os.environ["GOOGLE_CLOUD_LOCATION"] = "europe-west1"
+os.environ["GOOGLE_CLOUD_PROJECT"] = os.environ.get("GOOGLE_CLOUD_PROJECT", "vodafone-network-461305")
+os.environ["GOOGLE_CLOUD_LOCATION"] = os.environ.get("GOOGLE_CLOUD_LOCATION", "europe-west1")
 
 def classify_query(query: str) -> dict:
     """Classifies the query to determine if it relates to strategy or performance."""
@@ -97,13 +97,13 @@ async def run_db_agent(query: str, data_type: str, session_id: str = "default", 
     # explicit project/dataset ids from tools.py
     ddl_schema = bq_tools.get_bigquery_schema(
         dataset_id="h3_consumption",
-        project_id="vf-grp-aib-dev-ngi-sbx-alpha",
+        project_id=os.environ.get("GOOGLE_CLOUD_PROJECT", "vodafone-network-461305"),
         allowed_tables=allowed_tables
     )
     
     state_updates = {
         "database_settings": {
-            "bq_project_id": "vf-grp-aib-dev-ngi-sbx-alpha",
+            "bq_project_id": os.environ.get("GOOGLE_CLOUD_PROJECT", "vodafone-network-461305"),
             "bq_dataset_id": "h3_consumption",
             "bq_ddl_schema": ddl_schema,
         }

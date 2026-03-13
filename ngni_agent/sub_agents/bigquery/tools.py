@@ -24,7 +24,7 @@ from google.genai import Client
 
 # Assume that `BQ_PROJECT_ID` is set in the environment. See the
 # `data_agent` README for more details.
-project = os.getenv("BQ_PROJECT_ID", "vf-grp-aib-dev-ngi-sbx-alpha")
+project = os.getenv("GOOGLE_CLOUD_PROJECT", "vodafone-network-461305")
 location = os.getenv("GOOGLE_CLOUD_LOCATION", "europe-west1")
 llm_client = Client(vertexai=True, project=project, location=location)
 dataset_id = "h3_consumption"
@@ -58,7 +58,7 @@ def get_bq_client():
     """Get BigQuery client."""
     global bq_client
     if bq_client is None:
-        bq_client = bigquery.Client(project="vf-grp-aib-dev-ngi-sbx-alpha")
+        bq_client = bigquery.Client(project=project)
     return bq_client
 
 
@@ -81,13 +81,13 @@ def update_database_settings():
     ]
 
     ddl_schema = get_bigquery_schema(
-        "vf-grp-aib-dev-ngi-sbx-alpha",
+        "h3_consumption",
         client=get_bq_client(),
-        project_id="vf-grp-aib-dev-ngi-sbx-alpha",
+        project_id=project,
         allowed_tables=allowed_tables
     )
     database_settings = {
-        "bq_project_id": "vf-grp-aib-dev-ngi-sbx-alpha",
+        "bq_project_id": project,
         "bq_dataset_id": "h3_consumption",
         "bq_ddl_schema": ddl_schema,
     }
@@ -109,8 +109,12 @@ def get_bigquery_schema(dataset_id, client=None, project_id=None, allowed_tables
 
     if client is None:
         client = bigquery.Client(project=project_id)
-    project_id= "vf-grp-aib-dev-ngi-sbx-alpha"
-    dataset_id= "h3_consumption"
+    # Use parameters passed, or fallbacks if none
+    if project_id is None:
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "vodafone-network-461305")
+    if dataset_id is None:
+        dataset_id = "h3_consumption"
+        
     # dataset_ref = client.dataset(dataset_id)
     dataset_ref = bigquery.DatasetReference(project_id, dataset_id)
 

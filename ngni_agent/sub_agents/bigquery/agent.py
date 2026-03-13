@@ -26,8 +26,8 @@ from .prompts import return_instructions_bigquery
 
 NL2SQL_METHOD = os.getenv("NL2SQL_METHOD", "BASELINE")
 os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "True"
-os.environ["GOOGLE_CLOUD_PROJECT"] = "vf-grp-aib-dev-ngi-sbx-alpha"
-os.environ["GOOGLE_CLOUD_LOCATION"] = "europe-west1"
+os.environ["GOOGLE_CLOUD_PROJECT"] = os.environ.get("GOOGLE_CLOUD_PROJECT", "vodafone-network-461305")
+os.environ["GOOGLE_CLOUD_LOCATION"] = os.environ.get("GOOGLE_CLOUD_LOCATION", "europe-west1")
 
 def setup_before_agent_call(callback_context: CallbackContext) -> None:
     """Setup the agent."""

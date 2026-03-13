@@ -11,8 +11,7 @@ ENV PYTHONUNBUFFERED=1 \
     POETRY_NO_INTERACTION=1
 
 # Install Poetry from a custom PyPI mirror
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install "poetry==$POETRY_VERSION"
+RUN pip install "poetry==$POETRY_VERSION"
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -21,16 +20,14 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock* /app/
 
 # Generate the lock file and install dependencies (no-root to avoid installing the package itself yet)
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install --no-root --no-ansi
+RUN poetry install --no-root --no-ansi
 
 # Copy the rest of the application code
 COPY README.md main.py /app/
 COPY ngni_agent /app/ngni_agent
 
 # Install the project itself (if it's a package)
-RUN --mount=type=cache,target=/root/.cache/pypoetry \
-    poetry install --no-ansi
+RUN poetry install --no-ansi
 
 ENV PYTHONPATH=/app
 
